@@ -137,7 +137,7 @@ export default {
         var topTen;
         if(this.sortByTelenor) {
             var onlyTelenor = results.filter(function(el) {
-                return el.name = "Telenor Banka ATM";
+                return el.name == "Telenor Banka ATM";
             });
             topTen = onlyTelenor.slice(0, 10);
         } else {
