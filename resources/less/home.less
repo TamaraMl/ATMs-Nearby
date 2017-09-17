@@ -1,0 +1,63 @@
+html, body {
+    min-height: 100%;
+    @media (min-width: @screen-desktop) {
+        height: 100%;
+    }
+}
+body {
+    background-image: url(../resources/images/globe-2269653_960_720.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.h1, .h2, .h3, h1, h2, h3 {
+    margin-top: 0;
+}
+#app {
+    height: 100%;
+    padding: 20px;
+}
+
+#geolocation {
+    border-radius: @border-radius-base;
+    height: calc(~'100% - 20px');
+    background-color: @bg-container;
+    @media (max-width: @screen-desktop) {
+        padding: 20px 0 10px;
+        height: auto;
+    }
+    &.mobile {
+         @media (max-width: @screen-desktop) {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-radius: 0;
+            width: 100%;
+            }
+    }
+}
+
+.vertical-align {
+    @media (min-width: @screen-desktop) {
+        position: relative;
+        top: 50%;
+        .translate(0, -50%);
+    }
+}
+
+.map {
+    max-width: 100%;
+    @media (max-width: @screen-sm-max) {
+        margin-bottom: 15px;
+    }
+}
+
+/* first step */
+.first-step-app {
+    z-index: 999;
+    @media (max-width: @screen-sm-max) {
+        margin-top: 20px;
+        margin-bottom: 30px;
+    }
+}
+
+/* second step */

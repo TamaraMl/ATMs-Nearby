@@ -5,11 +5,11 @@
         <button class="btn btn-default" v-on:click="showNearBy()">Turn on Geolocation</button>
         <div>{{current_location}}</div>
     </div>
-    <div class="vertical-align second-step-app clearfix">
+    <div v-if="showList" class="vertical-align second-step-app clearfix">
         <div class="col-md-6">
-            <div id="map" v-bind:class="{map : showList}"></div>
+            <img v-bind:src="map_params" class="center-block map" alt="Google image">
         </div>
-        <div v-if="showList" class="col-md-6">
+        <div  class="col-md-6">
             <div class="text-right">
                 <button class="btn btn-default" v-on:click="sortByTelenor = !sortByTelenor"> {{sortByTelenor? 'All' : 'Multi-currency only'}}</button>
                 <button class="btn btn-default" v-on:click="sorted = !sorted" v-bind:class="{disabled : sortByTelenor}" v-bind:disabled="sortByTelenor">Sort by {{sorted? 'name' : 'distance'}}</button>
@@ -22,10 +22,20 @@
             </ul>
         </div>
     </div>
+    <div id="map" v-bind:class="{map : showList}" class="hidden"></div>
   </div>
 </template>
 
 <script>
+function getAsUriParameters(data) {
+   var url = '';
+   for (var prop in data) {
+      url += encodeURIComponent(prop) + '=' + 
+          encodeURIComponent(data[prop]) + '&';
+   }
+   return url.substring(0, url.length - 1)
+}
+
 export default {
   name: 'geolocation',
   data () {
@@ -39,7 +49,10 @@ export default {
       sorted: false,
       map: null,
       showList: false,
-      sortByTelenor: false
+      sortByTelenor: false,
+      map_base: "https://maps.googleapis.com/maps/api/staticmap?",
+      map_api_key: "AIzaSyAg4SIOvB7AM1TZ6_BZQ6kafO-FAZ3bGSY",
+      map_params: "https://maps.googleapis.com/maps/api/staticmap?"
     }
   },
   watch: {
@@ -96,7 +109,7 @@ export default {
     initialize: function() {
         
       var my_location = new google.maps.LatLng(this.latitude,this.longitude);
-
+    
       var map = new google.maps.Map(document.getElementById('map'), {
           center: my_location,
           zoom: 15
@@ -111,42 +124,34 @@ export default {
       var service = new google.maps.places.PlacesService(map);
       service.nearbySearch(request, this.callbackPlaces); 
     },
-           
-    createMarker: function(place) {
-        var infowindow = new google.maps.InfoWindow();
-        var placeLoc = place.geometry.location;
-        var marker = new google.maps.Marker({
-          map: map,
-          position: place.geometry.location
-        });
-
-        google.maps.event.addListener(marker, 'click', function() {
-          infowindow.setContent(place.name);
-          infowindow.open(map, this);
-        });
-    },
 
     callbackPlaces: function (results, status) {
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         var topTen;
         if(this.sortByTelenor) {
-      
             var onlyTelenor = results.filter(function(el) {
                 return el.name = "Telenor Banka ATM";
             });
-            
             topTen = onlyTelenor.slice(0, 10);
-            
         } else {
             topTen = results.slice(0, 10);
         }
         
         this.listOfPlaces = topTen;
-
-        for (let i = 0; i < topTen.length; i++) {
-            this.createMarker(topTen[i]);
+        var paramsForStatic = {
+            center: this.latitude+','+this.longitude,
+            size: '500x325',
+            key: this.map_api_key,
+            zoom: 15,
+            markers:""
         }
-      
+        
+        for (let i = 0; i < topTen.length; i++) {
+            paramsForStatic.markers+=topTen[i].vicinity+"|";
+        }
+        
+        this.map_params = this.map_base + getAsUriParameters(paramsForStatic);
+
       }
       this.getDistances();
     },
