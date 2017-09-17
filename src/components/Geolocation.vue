@@ -1,18 +1,18 @@
 <template>
-  <div id="geolocation">
+  <div id="geolocation" v-bind:class="{mobile : !showList}">
     <div v-if="!showList" class="first-step-app vertical-align text-center">   
         <h2>{{ hello_msg }}</h2>
         <button class="btn btn-default" v-on:click="showNearBy()">Turn on Geolocation</button>
         <div>{{current_location}}</div>
     </div>
-    <div v-if="showList" class="vertical-align clearfix">
+    <div class="vertical-align second-step-app clearfix">
         <div class="col-md-6">
-            <div id="map"></div>
+            <div id="map" v-bind:class="{map : showList}"></div>
         </div>
-        <div class="col-md-6">
+        <div v-if="showList" class="col-md-6">
             <div class="text-right">
-                <button class="btn btn-default" v-on:click="sortByTelenor = !sortByTelenor"> {{sortByTelenor? 'Unsort' : 'Sort'}} by multicurrency</button>
-                <button class="btn btn-default" v-on:click="sorted = !sorted" v-bind:class="{disabled : sortByTelenor}">Sort by {{sorted? 'name' : 'distance'}}</button>
+                <button class="btn btn-default" v-on:click="sortByTelenor = !sortByTelenor"> {{sortByTelenor? 'All' : 'Multi-currency only'}}</button>
+                <button class="btn btn-default" v-on:click="sorted = !sorted" v-bind:class="{disabled : sortByTelenor}" v-bind:disabled="sortByTelenor">Sort by {{sorted? 'name' : 'distance'}}</button>
             </div>
             <ul class="list-of-atms" v-if="sorted">
                 <li v-for="atm in listOfPlaces">{{atm.name}}, {{atm.distance}}</li>
@@ -58,7 +58,6 @@ export default {
   methods: {
     showNearBy: function() {
         if (navigator.geolocation) {
-            this.showList = true;
             navigator.geolocation.getCurrentPosition( this.showPosition, this.showError);
         } else { 
             this.current_location = "Geolocation is not supported by this browser.";
@@ -90,6 +89,7 @@ export default {
     },
     
     callGoogleApi: function() {
+        this.showList = true;
         this.initialize();
     },
         
@@ -97,7 +97,7 @@ export default {
         
       var my_location = new google.maps.LatLng(this.latitude,this.longitude);
 
-      map = new google.maps.Map(document.getElementById('map'), {
+      var map = new google.maps.Map(document.getElementById('map'), {
           center: my_location,
           zoom: 15
         });
