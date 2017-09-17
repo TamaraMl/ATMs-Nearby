@@ -11,7 +11,8 @@
         </div>
         <div class="col-md-6">
             <div class="text-right">
-                <button class="btn btn-default" v-on:click="sorted = !sorted">Sort by {{sorted? 'name' : 'distance'}}</button>
+                <button class="btn btn-default" v-on:click="sortByTelenor = !sortByTelenor"> {{sortByTelenor? 'Unsort' : 'Sort'}} by multicurrency</button>
+                <button class="btn btn-default" v-on:click="sorted = !sorted" v-bind:class="{disabled : sortByTelenor}">Sort by {{sorted? 'name' : 'distance'}}</button>
             </div>
             <ul class="list-of-atms" v-if="sorted">
                 <li v-for="atm in listOfPlaces">{{atm.name}}, {{atm.distance}}</li>
@@ -37,7 +38,8 @@ export default {
       listOfPlacesByName: [],
       sorted: false,
       map: null,
-      showList: false
+      showList: false,
+      sortByTelenor: false
     }
   },
   watch: {
@@ -48,6 +50,9 @@ export default {
             if(a.name > b.name) return 1;
             return 0;
         })
+    },
+    sortByTelenor: function() {
+        this.callGoogleApi();
     }
   },
   methods: {
@@ -104,7 +109,7 @@ export default {
       };
 
       var service = new google.maps.places.PlacesService(map);
-      service.nearbySearch(request, this.callbackPlaces);          
+      service.nearbySearch(request, this.callbackPlaces); 
     },
            
     createMarker: function(place) {
@@ -123,15 +128,26 @@ export default {
 
     callbackPlaces: function (results, status) {
       if (status == google.maps.places.PlacesServiceStatus.OK) {
-
-        var topTen = results.slice(0, 10);
+        var topTen;
+        if(this.sortByTelenor) {
+      
+            var onlyTelenor = results.filter(function(el) {
+                return el.name = "Telenor Banka ATM";
+            });
+            
+            topTen = onlyTelenor.slice(0, 10);
+            
+        } else {
+            topTen = results.slice(0, 10);
+        }
+        
         this.listOfPlaces = topTen;
 
         for (let i = 0; i < topTen.length; i++) {
             this.createMarker(topTen[i]);
         }
+      
       }
-
       this.getDistances();
     },
     
