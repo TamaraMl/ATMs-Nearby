@@ -1,5 +1,10 @@
 <template>
   <div id="geolocation" v-bind:class="{mobile : !showList}">
+  <transition name="fade">
+  <div id="loader" v-if="isLoading">
+    <img src="./resources/images/loader.gif" alt=".." />
+  </div>
+  </transition>
     <div v-if="!showList" class="first-step-app vertical-align text-center">   
         <h2>{{ hello_msg }}</h2>
         <button class="btn btn-default" v-on:click="showNearBy()">Turn on Geolocation</button>
@@ -9,7 +14,7 @@
         <div class="col-md-6">
             <img v-bind:src="map_params" class="center-block map" alt="Google image">
         </div>
-        <div  class="col-md-6">
+        <div class="col-md-6">
             <div class="text-right">
                 <button class="btn btn-default" v-on:click="sortByTelenor = !sortByTelenor"> {{sortByTelenor? 'All' : 'Multi-currency only'}}</button>
                 <button class="btn btn-default" v-on:click="sorted = !sorted" v-bind:class="{disabled : sortByTelenor}" v-bind:disabled="sortByTelenor">Sort by {{sorted? 'name' : 'distance'}}</button>
@@ -41,6 +46,7 @@ export default {
   data () {
     return {
       hello_msg: "All ATM's on one place!",
+      isLoading: false,
       current_location: '',
       latitude: '43.3209',
       longitude: '21.8958',
@@ -103,6 +109,7 @@ export default {
     
     callGoogleApi: function() {
         this.showList = true;
+        this.isLoading = true;
         this.initialize();
     },
         
@@ -153,6 +160,8 @@ export default {
         this.map_params = this.map_base + getAsUriParameters(paramsForStatic);
 
       }
+      
+      this.isLoading = false;
       this.getDistances();
     },
     

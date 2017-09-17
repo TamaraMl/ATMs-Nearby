@@ -12,7 +12,6 @@ import Geolocation from './components/Geolocation.vue'
 export default {
   name: 'app',
   components: {
-    
     Geolocation
   }
 }
