@@ -1,11 +1,26 @@
 <template>
   <div id="geolocation">
-    <div>{{current_location}}</div>
-    <button v-on:click="showNearBy()">Turn on Geolocation</button>
-    <div id="map"></div>
-    <button v-on:click="sorted = !sorted">Sort by {{sorted? 'name' : 'distance'}}</button>
-    <ul class="list-of-atms" v-if="sorted" v-for="atm in listOfPlaces">{{atm.name}} {{atm.distance}}</ul>
-    <ul class="list-of-atms" v-if="!sorted" v-for="atm in listOfPlacesByName">{{atm.name}} {{atm.distance}}</ul>
+    <div v-if="!showList" class="first-step-app vertical-align text-center">   
+        <h2>{{ hello_msg }}</h2>
+        <button class="btn btn-default" v-on:click="showNearBy()">Turn on Geolocation</button>
+        <div>{{current_location}}</div>
+    </div>
+    <div v-if="showList" class="vertical-align clearfix">
+        <div class="col-md-6">
+            <div id="map"></div>
+        </div>
+        <div class="col-md-6">
+            <div class="text-right">
+                <button class="btn btn-default" v-on:click="sorted = !sorted">Sort by {{sorted? 'name' : 'distance'}}</button>
+            </div>
+            <ul class="list-of-atms" v-if="sorted">
+                <li v-for="atm in listOfPlaces">{{atm.name}}, {{atm.distance}}</li>
+            </ul>
+            <ul class="list-of-atms" v-if="!sorted">
+                <li v-for="atm in listOfPlacesByName">{{atm.name}}, {{atm.distance}}</li>
+            </ul>
+        </div>
+    </div>
   </div>
 </template>
 
@@ -14,13 +29,15 @@ export default {
   name: 'geolocation',
   data () {
     return {
+      hello_msg: "All ATM's on one place!",
       current_location: '',
       latitude: '43.3209',
       longitude: '21.8958',
       listOfPlaces: [],
       listOfPlacesByName: [],
       sorted: false,
-      map: null
+      map: null,
+      showList: false
     }
   },
   watch: {
@@ -36,6 +53,7 @@ export default {
   methods: {
     showNearBy: function() {
         if (navigator.geolocation) {
+            this.showList = true;
             navigator.geolocation.getCurrentPosition( this.showPosition, this.showError);
         } else { 
             this.current_location = "Geolocation is not supported by this browser.";
@@ -45,8 +63,6 @@ export default {
     showPosition: function(position) {
         this.latitude =  position.coords.latitude;
         this.longitude =  position.coords.longitude;
-        this.current_location = "Latitude: " + this.latitude + 
-        " Longitude: " + this.longitude;
         this.callGoogleApi();
     },
 
@@ -56,7 +72,7 @@ export default {
                 this.current_location = "User denied the request for Geolocation."
                 break;
             case error.POSITION_UNAVAILABLE:
-                this.current_location = "Location information is unavailable. We are usign default."+
+                this.current_location = "Location information is unavailable. We are usign default.";
                 this.callGoogleApi();
                 break;
             case error.TIMEOUT:
@@ -143,11 +159,3 @@ export default {
   
 }
 </script>
-
-<style scope>
-#map {
-    width: 600px;
-    height: 300px;
-}
-
-</style>
