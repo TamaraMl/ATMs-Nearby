@@ -1,10 +1,8 @@
 <template>
   <div id="geolocation" v-bind:class="{mobile : !showList}">
-  <transition name="fade">
-  <div id="loader" v-if="isLoading">
-    <img src="./resources/images/loader.gif" alt=".." />
-  </div>
-  </transition>
+
+    <loader v-if="isLoading"></loader>
+
     <div v-if="!showList" class="first-step-app vertical-align text-center">   
         <h2>{{ hello_msg }}</h2>
         <button class="btn btn-default" v-on:click="showNearBy()">Turn on Geolocation</button>
@@ -26,6 +24,9 @@
                 <li v-for="atm in listOfPlacesByName">{{atm.name}}, {{atm.distance}}</li>
             </ul>
         </div>
+        <div class="col-xs-12 alert-warning mt-10" v-if="sorted">
+            For distance it is used Google Distance Matrix Service, so I'm sorry because data is not true - I'm getting wrong data from mentioned Service.
+        </div>
     </div>
     <div id="map" v-bind:class="{map : showList}" class="hidden"></div>
   </div>
@@ -41,8 +42,13 @@ function getAsUriParameters(data) {
    return url.substring(0, url.length - 1)
 }
 
+import Loader from './Loader.vue'
+
 export default {
   name: 'geolocation',
+  components: {
+    Loader
+  },
   data () {
     return {
       hello_msg: "All ATM's on one place!",
@@ -134,10 +140,12 @@ export default {
 
     callbackPlaces: function (results, status) {
       if (status == google.maps.places.PlacesServiceStatus.OK) {
+          console.log('results');
+          console.log(results);
         var topTen;
         if(this.sortByTelenor) {
             var onlyTelenor = results.filter(function(el) {
-                return el.name == "Telenor Banka ATM";
+                return el.name == "Telenor Banka";
             });
             topTen = onlyTelenor.slice(0, 10);
         } else {
@@ -179,9 +187,15 @@ export default {
           travelMode: google.maps.TravelMode.WALKING,
           avoidTolls: false
         }, function(response, status) {
+            console.log("status");
+            console.log(status);
+            console.log(response);
+
+
             for (let i = 0; i < topTen.length; i++) {
                 topTen[i].distance = response.rows[0].elements[i].distance.text;
             }
+
             _this.listOfPlaces=JSON.parse(JSON.stringify(_this.listOfPlaces));
         });
     }
